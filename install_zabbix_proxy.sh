@@ -58,18 +58,16 @@ fi
 }
 
 function installOnRASPBIAN() {
-apt install netcat -y
-wget https://repo.zabbix.com/zabbix/4.0/raspbian/pool/main/z/zabbix-release/zabbix-release_4.0-2+stretch_all.deb
-dpkg -i zabbix-release_4.0-2+stretch_all.deb -y
-apt install -f 
-dpkg -i zabbix-release_4.0-2+stretch_all.deb -y
-apt update -y
-apt upgrade -y
-apt install zabbix-proxy-mysql mariadb-server mariadb-client -y
+apt-get clean
+wget https://repo.zabbix.com/zabbix/4.0/raspbian/pool/main/z/zabbix-release/zabbix-release_4.0-2+stretch_all.deb	
+dpkg -i zabbix-release_4.0-2+stretch_all.deb 
+apt update
+apt install mariadb-server -y
+apt install zabbix-proxy-mysql -y
 systemctl restart mariadb
 systemctl enable mariadb
 systemctl stop zabbix-proxy
-systemctl enable zabbix-proxy
+systemctl enable zabbix-proxy	
 }
 
 function installOnUBUNTU() {
@@ -141,12 +139,14 @@ echo "Please enter the following information: "
 
 ### Get user inputs
 function getUserINPUT() {
+	
+echo -e "Note: Default name for databases: zabbix_proxy  Default name for user:  zabbix   Default password: zabbix \n."
 
-read -t 30 -p "What do you like to name this Proxy : " PROXY_NAME
-read -t 30 -p "Zabbix Server IP you want to connect to : " SERVER_IP
-read -t 30 -p "Create a database : " DB_NAME
-read -t 30 -p "Create a user  : " DB_USER
-read -t 30 -s -p "Choose a password : " USER_PASS
+read -p "What do you like to name this Proxy : " PROXY_NAME
+read -p "Zabbix Server IP you want to connect to : " SERVER_IP
+read -p "Create a database : " DB_NAME
+read -p "Create a user  : " DB_USER
+read -s -p "Choose a password : " USER_PASS
 
 echo -e "Please review the information you entered: 
 
