@@ -14,6 +14,12 @@
 ############# START - Installing packages 1
 #############
 
+### Need to run as root
+if [[ $EUID -ne 0 ]]; then
+echo -e "\n  FAILED: You need to run this as root user.\n"
+exit 1
+fi
+
 function installOnCENTOS() {
 
 yum clean all  -y
@@ -52,10 +58,14 @@ fi
 }
 
 function installOnRASPBIAN() {
+apt install netcat -y
 wget https://repo.zabbix.com/zabbix/4.0/raspbian/pool/main/z/zabbix-release/zabbix-release_4.0-2+stretch_all.deb
-dpkg -i zabbix-release_4.0-2+stretch_all.deb
+dpkg -i zabbix-release_4.0-2+stretch_all.deb -y
+apt install -f 
+dpkg -i zabbix-release_4.0-2+stretch_all.deb -y
 apt update -y
-apt install zabbix-proxy-mysql mariadb-server mariadb-client netcat -y
+apt upgrade -y
+apt install zabbix-proxy-mysql mariadb-server mariadb-client -y
 systemctl restart mariadb
 systemctl enable mariadb
 systemctl stop zabbix-proxy
