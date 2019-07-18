@@ -1,8 +1,10 @@
 #!/bin/bash
 
+# Copyright (c) 2019 - Younis Amedi <ya@younisamedi.com>
+# This script is licensed under GNU GPL version 2.0 or above
+#=========================================================================================
 #title           : install_zabbix_proxy.sh
 #description     : This script will install and configure Zabbix Proxy.
-#author		     : Younis Amedi - ya@younisamedi.com
 #date            : 16 JULY 2019
 #version         : 1.0  (Beta)    
 #usage		     : install_zabbix_proxy.sh
@@ -20,12 +22,33 @@ echo -e "\n  FAILED: You need to run this as root user.\n"
 exit 1
 fi
 
+
+### Message to user:
+echo -e "
+This script will install Zabbix Proxy version 4.0. It's only applicable on the following OS distributions:
+
+CentOS 7 
+Ubuntu 18
+Raspbian 10
+"
+read -r -p "Do you want to continue? [y/N] " response
+echo ""
+case "$response" in
+    [yY][eE][sS]|[yY]) 
+        echo "Please wait..."
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+
 function installOnCENTOS() {
 
 yum clean all  -y
 rpm -Uvh https://repo.zabbix.com/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-1.el7.noarch.rpm
 
-yum -y install zabbix-proxy-mysql.x86_64 nc
+yum -y install zabbix-proxy-mysql.x86_64 telnet
 
 yum 
 
@@ -58,12 +81,12 @@ fi
 }
 
 function installOnRASPBIAN() {
-apt-get clean
-wget https://repo.zabbix.com/zabbix/4.0/raspbian/pool/main/z/zabbix-release/zabbix-release_4.0-2+stretch_all.deb	
-dpkg -i zabbix-release_4.0-2+stretch_all.deb 
+update and upgrade
+https://repo.zabbix.com/zabbix/4.0/raspbian/pool/main/z/zabbix-release/zabbix-release_4.0-2%2Bbuster_all.deb
+dpkg -i zabbix-release_4.0-2+stretch_all.deb
 apt update
-apt install mariadb-server -y
-apt install zabbix-proxy-mysql -y
+apt install mariadb-server
+apt install zabbix-proxy-mysql telnet
 systemctl restart mariadb
 systemctl enable mariadb
 systemctl stop zabbix-proxy
@@ -74,7 +97,7 @@ function installOnUBUNTU() {
 wget https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-2+bionic_all.deb
 dpkg -i zabbix-release_4.0-2+bionic_all.deb
 apt update -y
-apt install zabbix-proxy-mysql mariadb-server mariadb-client netcat -y
+apt install zabbix-proxy-mysql mariadb-server mariadb-client telnet
 systemctl restart mariadb
 systemctl enable mariadb
 systemctl stop zabbix-proxy
@@ -127,7 +150,7 @@ systemctl restart mariadb
 systemctl restart zabbix-proxy
 echo "Installation is completed!"
 echo "Testing port 10051 connection between Zabbix Server and Proxy, please wait..." 
-telnet ${SERVER_IP} 10051
+echo 'exit' | telnet ${SERVER_IP} 10051
 exit
 }
 
@@ -140,7 +163,8 @@ echo "Please enter the following information: "
 ### Get user inputs
 function getUserINPUT() {
 	
-echo -e "Note: Default name for databases: zabbix_proxy  Default name for user:  zabbix   Default password: zabbix \n."
+echo -e "
+Note: \e[92mDefault name for databases: zabbix_proxy  Default name for user:  zabbix   Default password: zabbix \e[0m \n"
 
 read -p "What do you like to name this Proxy : " PROXY_NAME
 read -p "Zabbix Server IP you want to connect to : " SERVER_IP
@@ -193,7 +217,7 @@ do
      [yY][eE][sS]|[yY])
  
 ### call the createDB function
-createDB
+echo "Creating database and testing the connection... This may take a while, please wait." && createDB
 
 exit 0
 
