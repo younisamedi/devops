@@ -162,6 +162,8 @@ fi
 function startServices() {
 systemctl restart mariadb
 systemctl restart zabbix-proxy
+systemctl enable zabbix-proxy
+systemctl enable mariadb
 echo "Installation is completed!"
 echo "Testing port 10051 connection between Zabbix Server and Proxy, please wait..." 
 exec echo 'exit' | telnet ${SERVER_IP} 10051
