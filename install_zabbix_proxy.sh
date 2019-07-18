@@ -82,7 +82,7 @@ fi
 
 function installOnRASPBIAN() {
 update and upgrade
-https://repo.zabbix.com/zabbix/4.0/raspbian/pool/main/z/zabbix-release/zabbix-release_4.0-2%2Bbuster_all.deb
+wget https://repo.zabbix.com/zabbix/4.0/raspbian/pool/main/z/zabbix-release/zabbix-release_4.0-2%2Bbuster_all.deb
 dpkg -i zabbix-release_4.0-2+buster_all.deb
 apt update
 apt install mariadb-server
