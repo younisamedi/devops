@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2019 - Younis Amedi < ya@younisamedi.com >
+# Copyright (c) 2019 - Younis Amedi <ya@younisamedi.com>
 # This script is licensed under GNU GPL version 2.0 or above
 #=========================================================================================
 #title           : install_zabbix_proxy.sh
@@ -84,9 +84,9 @@ function installOnRASPBIAN() {
 update and upgrade
 wget https://repo.zabbix.com/zabbix/4.0/raspbian/pool/main/z/zabbix-release/zabbix-release_4.0-2%2Bbuster_all.deb
 dpkg -i zabbix-release_4.0-2+buster_all.deb
-apt update
-apt install mariadb-server
-apt install zabbix-proxy-mysql telnet
+apt update -y
+apt install mariadb-server -y
+apt install zabbix-proxy-mysql telnet -y
 systemctl restart mariadb
 systemctl enable mariadb
 systemctl stop zabbix-proxy
@@ -97,7 +97,7 @@ function installOnUBUNTU() {
 wget https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-2+bionic_all.deb
 dpkg -i zabbix-release_4.0-2+bionic_all.deb
 apt update -y
-apt install zabbix-proxy-mysql mariadb-server mariadb-client telnet
+apt-get install -y zabbix-proxy-mysql mariadb-server mariadb-client telnet
 systemctl restart mariadb
 systemctl enable mariadb
 systemctl stop zabbix-proxy
@@ -150,7 +150,7 @@ systemctl restart mariadb
 systemctl restart zabbix-proxy
 echo "Installation is completed!"
 echo "Testing port 10051 connection between Zabbix Server and Proxy, please wait..." 
-echo 'exit' | telnet ${SERVER_IP} 10051
+exec echo 'exit' | telnet ${SERVER_IP} 10051
 exit
 }
 
