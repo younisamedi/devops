@@ -7,7 +7,7 @@
 #description     : This script will install and configure Zabbix Proxy.
 #date            : 16 JULY 2019
 #version         : 1.0  (Beta)    
-#usage		 : install_zabbix_proxy.sh
+#usage           : install_zabbix_proxy.sh
 #notes           : Only applicable on CentOS7, Ubuntu18, and Raspbian9 or higher versions.
 #bash_version    : 4.1.5(1)-release
 #=========================================================================================
@@ -21,7 +21,6 @@ if [[ $EUID -ne 0 ]]; then
 echo -e "\n  FAILED: You need to run this as root user.\n"
 exit 1
 fi
-
 
 ### Message to user:
 echo -e "
@@ -104,21 +103,36 @@ systemctl stop zabbix-proxy
 systemctl enable zabbix-proxy
 }
 
-#!/bin/bash
-if [[ `which yum` ]]; then
+### Detect OS 1/2:
+if [ -n "$(command -v lsb_release)" ]; then
+	distroname=$(lsb_release -s -d)
+elif [ -f "/etc/os-release" ]; then
+	distroname=$(grep PRETTY_NAME /etc/os-release | sed 's/PRETTY_NAME=//g' | tr -d '="')
+elif [ -f "/etc/debian_version" ]; then
+	distroname="Debian $(cat /etc/debian_version)"
+elif [ -f "/etc/redhat-release" ]; then
+	distroname=$(cat /etc/redhat-release)
+else
+	distroname="$(uname -s) $(uname -r)"
+fi
+### Detect OS 2/2:
+if [ "${distroname}" = "CentOS Linux 7 (Core)" ]; then
    IS_CENTOS=1
-elif [[ `which apt` ]]; then
+elif [ "${distroname}" = "Ubuntu 18.04.2 LTS" ]; then
    IS_UBUNTU=1
-elif [[ `which apt` ]]; then
+elif [ "${distroname}" = "Raspbian GNU/Linux 10 (buster)" ]; then
    IS_RASPBIAN=1   
 else
    IS_UNKNOWN=1
+   echo "This is a ${distroname} system and it's not supported."
+   exit 2
 fi
 
-### Debuging flags
-#echo $IS_RHEL
-#echo $IS_DEBIAN
-#echo $IS_UNKNOWN
+### Debug flags
+##echo "this is centos ${IS_CENTOS}"
+##echo "this is ubuntu ${IS_UBUNTU}"
+##echo "this is raspbian ${IS_RASPBIAN}"
+##echo "this is unknown ${IS_UNKNOWN}"
 
 ### Install packages:
 if [[ "$IS_CENTOS" -eq "1" ]]; then
