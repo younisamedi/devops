@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Copyright (c) 2019 - Younis Amedi <ya@younisamedi.com>
+# Copyright (c) 2019 - Younis Amedi < ya@younisamedi.com >
 # This script is licensed under GNU GPL version 2.0 or above
 #=========================================================================================
 #title           : install_zabbix_proxy.sh
 #description     : This script will install and configure Zabbix Proxy.
 #date            : 16 JULY 2019
 #version         : 1.0  (Beta)    
-#usage		     : install_zabbix_proxy.sh
+#usage		 : install_zabbix_proxy.sh
 #notes           : Only applicable on CentOS7, Ubuntu18, and Raspbian9 or higher versions.
 #bash_version    : 4.1.5(1)-release
 #=========================================================================================
