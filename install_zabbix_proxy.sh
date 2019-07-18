@@ -7,7 +7,7 @@
 #description     : This script will install and configure Zabbix Proxy.
 #date            : 16 JULY 2019
 #version         : 1.0  (Beta)    
-#usage		     : install_zabbix_proxy.sh
+#usage		 : install_zabbix_proxy.sh
 #notes           : Only applicable on CentOS7, Ubuntu18, and Raspbian9 or higher versions.
 #bash_version    : 4.1.5(1)-release
 #=========================================================================================
