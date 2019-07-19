@@ -134,6 +134,7 @@ fi
 ##echo "this is raspbian ${IS_RASPBIAN}"
 ##echo "this is unknown ${IS_UNKNOWN}"
 
+### Future use $VARS (under development)
 ### Install packages:
 if [[ "$IS_CENTOS" -eq "1" ]]; then
 installOnCENTOS
