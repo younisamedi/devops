@@ -49,8 +49,6 @@ rpm -Uvh https://repo.zabbix.com/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-1.e
 
 yum -y install zabbix-proxy-mysql.x86_64 telnet
 
-yum 
-
 cat <<EOF > /etc/yum.repos.d/mariadb.repo
 [mariadb]
 name = MariaDB
