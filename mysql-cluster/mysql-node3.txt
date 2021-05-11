@@ -1,0 +1,233 @@
+﻿# Copyright (c) 2018 - Younis Amedi www.younisamedi.com 
+# This script is licensed under GNU GPL version 2.0 or above
+#=========================================================================================
+#title           : MySQL Cluster 
+#description     : Build MySQL cluster with three nodes for High Availability 
+#date            : OCT 2018
+#version         : 1.0
+﻿###
+### MySQL server: mysql1 (10.12.96.8)
+###
+#=========================================================================================
+### Replace "myPa$$word" with your mysql root password
+
+1) Configure /etc/hosts file; edit the file and add hostnames and ips for all the mysql servers (at the end of file):
+10.12.96.6        mysql1
+10.12.96.7        mysql2
+10.12.96.8        mysql3
+
+
+2) Add MariaDB repository:
+Create a new repo file for the Galera repository /etc/yum.repos.d/mariadb.repo with the following content:
+
+
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.2/centos7-amd64
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1
+
+
+Save the file.
+
+
+3) Install MySQL Gallera Cluster packages:
+yum -y install MariaDB-server MariaDB-client MariaDB-common rsync
+
+
+4) Enable MySQL service:
+systemctl enable mariadb
+
+
+5) Configure Selinux to allow some specific ports used by the MySQL Gallera cluster and also MySQL service
+semanage port -a -t mysqld_port_t -p tcp 4567
+semanage port -a -t mysqld_port_t -p udp 4567
+semanage port -a -t mysqld_port_t -p tcp 4568
+semanage port -a -t mysqld_port_t -p tcp 4444
+semanage permissive -a mysqld_t
+
+
+6) Enable and start MariaDB service
+systemctl enable mariadb
+systemctl start mariadb
+
+
+7) Configure mysql root password (run on all three servers, set the same password and answer Y to all the questions); we'll use this password for now: myPa$$word
+mysql_secure_installation
+
+
+8) Stop mariadb service:
+systemctl stop mariadb
+
+
+9) Edit MySQL configuration file /etc/my.cnf.d/server.cnf and make it look like this:
+
+
+#
+# These groups are read by MariaDB server.
+# Use it for options that only the server (but not clients) should see
+#
+# See the examples of server my.cnf files in /usr/share/mysql/
+#
+
+
+# this is read by the standalone daemon and embedded servers
+[server]
+
+
+# this is only for the mysqld standalone daemon
+[mysqld]
+
+
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+skip-external-locking
+local-infile=0
+skip-name-resolve
+skip-show-database
+
+
+# settings
+query_cache_size=0
+query_cache_type=0
+innodb_flush_log_at_trx_commit=0
+innodb_buffer_pool_size=256M
+innodb_undo_logs=1
+innodb_safe_truncate=OFF
+
+
+# logs
+log_error=/var/log/mariadb.log
+log_warnings=2
+
+
+#
+# * Galera-related settings
+#
+[galera]
+binlog_format=ROW
+default-storage-engine=innodb
+innodb_autoinc_lock_mode=2
+
+
+bind-address=10.12.96.8
+
+
+wsrep_on=ON
+wsrep_retry_autocommit=4
+
+
+wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+wsrep_cluster_address="gcomm://10.12.96.6,10.12.96.7,10.12.96.8"
+
+
+## Galera Cluster Configuration
+wsrep_cluster_name="sqlcluster"
+## Galera Synchronization Configuration
+wsrep_sst_method=rsync
+## Galera Node Configuration
+wsrep_node_address="10.12.96.8"
+wsrep_node_name="mysql3"
+
+
+# this is only for embedded server
+[embedded]
+
+
+# This group is only read by MariaDB servers, not by MySQL.
+# If you use the same .cnf file for MySQL and MariaDB,
+# you can put MariaDB-only options here
+[mariadb]
+
+
+# This group is only read by MariaDB-10.2 servers.
+# If you use the same .cnf file for MariaDB of different versions,
+# use this group for options that older servers don't understand
+[mariadb-10.2]
+
+
+10) Edit mariadb.service file /usr/lib/systemd/system/mariadb.service to increase the file descriptors (by default LimitNOFILE=16384):
+LimitNOFILE=65535
+
+
+11) Apply changes by reloading the systemd daemon:
+systemctl daemon-reload
+
+
+13) Create MariaDB log file and set the right permissions:
+touch /var/log/mariadb.log
+chown mysql:mysql /var/log/mariadb.log
+
+
+14) Start the MySQL server:
+systemctl start mariadb
+
+
+15) Confirm MySQL Galler cluster replication (you'll provide the new configured password):
+mysql -u root -p
+mysql> SHOW STATUS LIKE 'wsrep_cluster_size';
+
+
+You should get a result similar with the one bellow:
++--------------------+-------+
+| Variable_name      | Value |
++--------------------+-------+
+| wsrep_cluster_size | 3     |
++--------------------+-------+
+1 row in set (0.00 sec)
+
+
+16) Create a file /etc/sysconfig/iptables with the content bellow:
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -i lo -j ACCEPT
+-A INPUT -d 127.0.0.0/8 -j REJECT --reject-with icmp-port-unreachable
+-A INPUT -p icmp -m icmp --icmp-type 17 -j DROP
+-A INPUT -p icmp -m icmp --icmp-type 13 -j DROP
+-A INPUT -p icmp -m icmp --icmp-type 8 -m limit --limit 1/sec -j ACCEPT
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m state --state NEW -j DROP
+-A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+-A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
+-A INPUT -m state --state INVALID -j DROP
+-A INPUT -s <PUBLIC IP NODE 1> -j ACCEPT
+-A INPUT -s <PUBLIC IP NODE 2> -j ACCEPT
+-A INPUT -s <PUBLIC IP NODE 3> -j ACCEPT
+-A INPUT -p all -s 10.12.96.0/24 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 22 -m recent --update --seconds 60 --hitcount 5 --rttl --name SSH --mask 255.255.255.255 --rsource -j DROP
+-A INPUT -p tcp -m tcp --dport 22 -m recent --set --name SSH --mask 255.255.255.255 --rsource -j ACCEPT
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+-A INPUT -m recent --rcheck --seconds 86400 --name portscan --mask 255.255.255.255 --rsource -j DROP
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
+
+
+17) Save the file, enable and restart iptables:
+systemctl enable iptables
+systemctl restart iptables
+
+
+###
+### MySQL Backup (mysql3):
+###
+
+
+18) Download Percona XtraBackup tools:
+cd /root/
+rpm -Uhv https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+yum -y erase percona-xtrabackup-80-8.0.5-1.el7.x86_64
+yum -y install percona-xtrabackup-24.x86_64
+
+
+19) Create a mysql root account for the backup:
+mysql -u root -p (use password: myPa$$word)
+
+
+MariaDB [(none)]> create user 'root'@'10.12.96.8' identified by 'myPa$$word';
+MariaDB [(none)]> grant all on *.* to 'root'@'10.12.96.8';
+MariaDB [(none)]> flush privileges;
+
+############################
+
