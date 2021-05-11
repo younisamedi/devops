@@ -210,7 +210,7 @@ systemctl restart iptables
 
 
 ###
-### MySQL Backup (mysql3):
+### Optional but highly recommended, MySQL Backup (mysql3):
 ###
 
 
@@ -230,6 +230,6 @@ MariaDB [(none)]> grant all on *.* to 'root'@'10.12.96.8';
 MariaDB [(none)]> flush privileges;
 
 
-20) As a cold backup, I highly recommend you to use a Python or Bash script to backup the .SQL file to an external server freuqntly
+# As a cold backup, I highly recommend you to use a Python or Bash script to backup the .SQL file to an external server freuqntly
 
 ############################
