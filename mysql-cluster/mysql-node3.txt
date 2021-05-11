@@ -1,11 +1,11 @@
-﻿# Copyright (c) 2018 - Younis Amedi www.younisamedi.com 
+# Copyright (c) 2018 - Younis Amedi www.younisamedi.com 
 # This script is licensed under GNU GPL version 2.0 or above
 #=========================================================================================
 #title           : MySQL Cluster 
 #description     : Build MySQL cluster with three nodes for High Availability 
 #date            : OCT 2018
 #version         : 1.0
-﻿###
+###
 ### MySQL server: mysql1 (10.12.96.8)
 ###
 #=========================================================================================
