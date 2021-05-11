@@ -229,5 +229,7 @@ MariaDB [(none)]> create user 'root'@'10.12.96.8' identified by 'myPa$$word';
 MariaDB [(none)]> grant all on *.* to 'root'@'10.12.96.8';
 MariaDB [(none)]> flush privileges;
 
-############################
 
+20) As a cold backup, I highly recommend you to use a Python or Bash script to backup the .SQL file to an external server freuqntly
+
+############################
