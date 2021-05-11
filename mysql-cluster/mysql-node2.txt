@@ -208,4 +208,4 @@ systemctl enable iptables
 systemctl restart iptables
 
 
-18) Head to mysql2 server and continue the setup there
+18) Head to mysql3 server and continue the setup there
